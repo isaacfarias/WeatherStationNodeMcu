@@ -1,8 +1,9 @@
 #include <Wire.h>
+#include <Adafruit_BMP085.h>
 
 //Time Stuff begin
 #define RTC_DS1307_ADDRESS 0x68
-
+#define DEBUG 1
 typedef struct TIME {
   uint8_t Second;
   uint8_t Minute;
@@ -54,20 +55,39 @@ bool ReadTime (TIME *Time) {
 }
 
 void PrintTime (TIME *Time) {
-  Serial.print (Time->Year);
-  Serial.print ("/");
-  Serial.print (Time->Month);
-  Serial.print ("/");
-  Serial.print (Time->Day);
-  Serial.print (" ");
-  Serial.print (Time->Hour);
-  Serial.print (":");
-  Serial.print (Time->Minute);
-  Serial.print (":");
-  Serial.println (Time->Second);
+
 }
 
 //Time stuff end
+
+Adafruit_BMP085 gBmp;
+
+
+
+void getData () {
+  String data = "";
+  data += gTime.Year;
+  data += "/";
+  data += gTime.Month;
+  data += "/";
+  data += gTime.Day;
+  data += " ";
+  data += gTime.Hour;
+  data += ":";
+  data += gTime.Minute;
+  data += ":";
+  data += gTime.Second;
+  data += " ";
+  data += gBmp.readTemperature ();
+  data += " ";
+  data += gBmp.readPressure ();
+  data += " ";
+  data += gBmp.readAltitude();
+  Serial.println (data);
+}
+
+uint16_t Devices;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -76,14 +96,14 @@ void setup() {
     
   }
   Serial.println();
-  Serial.println("#Wheather station begining");
+  Serial.println("# Wheather station begining");
+  Serial.print("# BMP18 sensor: ");
+  Serial.println(gBmp.begin());
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   delay(1000);
-  if (ReadTime (&gTime)) {
-    PrintTime (&gTime);
-  }
-
+  ReadTime (&gTime);
+  getData ();
 }
