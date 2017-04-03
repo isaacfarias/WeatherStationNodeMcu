@@ -1,5 +1,13 @@
 #include <Wire.h>
 #include <Adafruit_BMP085.h>
+#include <DHT.h>
+
+//DHT stuff begin
+#define DHTPIN 2
+#define DHTTYPE DHT11
+
+DHT gDht(DHTPIN, DHTTYPE);
+//DHT stuff end
 
 //Time Stuff begin
 #define RTC_DS1307_ADDRESS 0x68
@@ -66,6 +74,7 @@ Adafruit_BMP085 gBmp;
 
 void getData () {
   String data = "";
+  int tempHum = 0;
   data += gTime.Year;
   data += "/";
   data += gTime.Month;
@@ -83,6 +92,13 @@ void getData () {
   data += gBmp.readPressure ();
   data += " ";
   data += gBmp.readAltitude();
+  data += " ";
+  tempHum = (int) gDht.readHumidity();
+  if(tempHum > 99) {
+    tempHum = 0;
+  }
+  data += tempHum; 
+  data += "%";
   Serial.println (data);
 }
 
@@ -99,6 +115,7 @@ void setup() {
   Serial.println("# Wheather station begining");
   Serial.print("# BMP18 sensor: ");
   Serial.println(gBmp.begin());
+  gDht.begin();
 }
 
 void loop() {
